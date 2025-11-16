@@ -70,7 +70,7 @@ const cvSchema = new Schema({
   },
 
 }, {
-  timestamps: true, t
+  timestamps: true, 
 });
 
 const CV = mongoose.model('CV', cvSchema);
