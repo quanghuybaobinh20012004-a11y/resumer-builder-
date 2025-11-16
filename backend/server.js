@@ -18,7 +18,7 @@ const port = process.env.PORT || 5000;
 
 // 🔥 FIX PRE-FLIGHT (QUAN TRỌNG)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://resumebuilder1111.netlify.app");
+  res.header("Access-Control-Allow-Origin", "https://resumebuilder11111.netlify.app");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
