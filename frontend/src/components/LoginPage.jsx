@@ -123,7 +123,6 @@ function LoginPage() {
       setMessage('Đăng nhập thất bại: ' + (loginError || 'Vui lòng thử lại.'));
     }
   }, [searchParams, navigate]);
-  // ---------------------------------------------
 
   const handleSubmit = async (e) => {
     e.preventDefault();

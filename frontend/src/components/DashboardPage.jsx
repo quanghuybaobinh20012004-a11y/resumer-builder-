@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 function DashboardPage() {
   const [cvName, setCvName] = useState('');
-  const [myCVs, setMyCVs] = useState([]); 
+  const [myCVs, setMyCVs] = useState([]); // Dòng 9: Đã đúng
   const [user, setUser] = useState({ fullName: 'Người dùng', avatar: '' });
   const [loading, setLoading] = useState(true);
   
@@ -49,7 +49,15 @@ function DashboardPage() {
   const fetchInitialData = async () => {
     try {
       const cvRes = await apiService.get('/cvs');
-      setMyCVs(cvRes.data);
+      
+      // --- SỬA LỖI (1/2): KIỂM TRA TRƯỚC KHI SET ---
+      // Chỉ set state nếu API trả về LÀ MỘT MẢNG
+      if (Array.isArray(cvRes.data)) {
+        setMyCVs(cvRes.data);
+      } else {
+        // Nếu API trả về lỗi (object, null, v.v...), set một mảng rỗng
+        setMyCVs([]);
+      }
       
       const userRes = await apiService.get('/user/me');
       setUser(userRes.data);
@@ -57,6 +65,7 @@ function DashboardPage() {
       setLoading(false);
     } catch (error) {
       console.error("Lỗi tải dữ liệu", error);
+      setMyCVs([]); // Quan trọng: Set mảng rỗng nếu API sập
       setLoading(false);
     }
   };
@@ -215,7 +224,7 @@ function DashboardPage() {
         </div>
 
         <div className="flex justify-between items-end mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">CV Của Tôi <span className="text-sm font-normal text-gray-500 ml-2">({myCVs.length} bản ghi)</span></h2>
+            <h2 className="text-2xl font-bold text-gray-800">CV Của Tôi <span className="text-sm font-normal text-gray-500 ml-2">({Array.isArray(myCVs) ? myCVs.length : 0} bản ghi)</span></h2>
             
             <div className="flex items-center gap-3">
                 {cvsToCompare.length > 0 && (
@@ -237,7 +246,8 @@ function DashboardPage() {
             </div>
         </div>
 
-        {myCVs.length > 0 ? (
+        {/* --- SỬA LỖI (2/2): "RÀO CHẮN" TRƯỚC KHI MAP --- */}
+        {Array.isArray(myCVs) && myCVs.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {myCVs.map(cv => (
                 <div 
