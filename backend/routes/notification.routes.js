@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { sendNotificationEmail } = require('../utils/mailer');
 const User = require('../models/user.model'); 
+const authMiddleware = require('../middleware/auth.middleware'); // <-- Dòng này bạn đã thêm, RẤT TỐT
 
-router.post('/new-template', async (req, res) => {
+//           VIỆC CẦN LÀM LÀ THÊM authMiddleware VÀO ĐÂY
+//           VVVVVVVVVVVVVVV
+router.post('/new-template', authMiddleware, async (req, res) => { // <-- SỬA DÒNG NÀY
   try {
     const { subject, templateName, featureDescription } = req.body;
 
@@ -14,6 +17,7 @@ router.post('/new-template', async (req, res) => {
         return res.status(404).json({ message: 'Không tìm thấy người dùng nào để gửi.' });
     }
 
+    // (Phần còn lại của code giữ nguyên)
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">

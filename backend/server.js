@@ -1,5 +1,5 @@
 const express = require('express'); 
-const cors = require('cors');
+const cors = require('cors'); // <-- Tốt
 const mongoose = require('mongoose');
 const passport = require('passport');
 require('dotenv').config();
@@ -16,27 +16,39 @@ const notificationRoutes = require('./routes/notification.routes');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// 🔥 FIX PRE-FLIGHT (QUAN TRỌNG)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://resumebuilder11111.netlify.app");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
+// ----- BẮT ĐẦU SỬA CORS -----
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+// 1. XÓA BỎ HOÀN TOÀN ĐOẠN "FIX PRE-FLIGHT" CŨ CỦA BẠN.
+//    (Đoạn app.use((req, res, next) => {...}) GÂY XUNG ĐỘT)
 
-  next();
-});
+// 2. TẠO MỘT WHITELIST ĐẦY ĐỦ
+const whitelist = [
+    'http://localhost:5173', // Cổng 5173
+    'http://localhost:5174', // Cổng 5174 (lỗi mới nhất của bạn)
+    'https://resumebuilder11111.netlify.app', // Trang web chính (5 số 1)
+    /^https:\/\/([a-zA-Z0-9-]+\-\-)?resumebuilder11111\.netlify\.app$/ // Regex cho các bản preview của Netlify (RẤT QUAN TRỌNG)
+];
 
-// CORS CHUẨN
-app.use(cors({
-  origin: "https://resumebuilder1111.netlify.app",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Cho phép nếu origin nằm trong whitelist,
+        // hoặc nếu origin là 'undefined' (ví dụ: request từ Postman, server-to-server)
+        if (!origin || whitelist.some(o => o instanceof RegExp ? o.test(origin) : o === origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+};
+
+// 3. SỬ DỤNG DUY NHẤT 1 CẤU HÌNH CORS NÀY
+app.use(cors(corsOptions));
+
+// ----- KẾT THÚC SỬA CORS -----
+
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -44,8 +56,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(passport.initialize());
 
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ Đã kết nối thành công tới MongoDB!"))
-  .catch(err => console.error("❌ Lỗi kết nối MongoDB:", err));
+  .then(() => console.log("✅ Đã kết nối thành công tới MongoDB!"))
+  .catch(err => console.error("❌ Lỗi kết nối MongoDB:", err));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cvs', cvRoutes);
@@ -55,5 +67,5 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 
 app.listen(port, () => {
-  console.log(`🚀 Backend server đang chạy tại http://localhost:${port}`);
+  console.log(`🚀 Backend server đang chạy tại http://localhost:${port}`);
 });

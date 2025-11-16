@@ -7,6 +7,8 @@ const passport = require('passport');
 const { sendNotificationEmail } = require('../utils/mailer'); 
 const crypto = require('crypto');
 
+// (Tất cả các route /register, /login, /forgot-password, /reset-password của bạn đều đúng, giữ nguyên)
+// ...
 router.post('/register', async (req, res) => {
   try {
     const { email, password, fullName } = req.body;
@@ -142,15 +144,24 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// ...
+
+// ----- BẮT ĐẦU SỬA Ở ĐÂY -----
 
 router.get('/google', 
   passport.authenticate('google', { 
     scope: ['profile', 'email'] 
   })
 );
+
+// Thêm dòng này để lấy URL của frontend từ biến môi trường
+// Khi ở máy: dùng 'http://localhost:5173'
+// Khi deploy: dùng 'https://resumebuilder11111.netlify.app'
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
 router.get('/google/callback', 
   passport.authenticate('google', { 
-    failureRedirect: 'http://localhost:5173/login',
+    failureRedirect: `${clientUrl}/login`, // <-- SỬA TỪ 'http://localhost...'
     session: false 
   }), 
   (req, res) => {
@@ -165,8 +176,9 @@ router.get('/google/callback',
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.redirect(`http://localhost:5173/login?token=${token}`);
+    res.redirect(`${clientUrl}/login?token=${token}`); // <-- SỬA TỪ 'http://localhost...'
   }
 );
+// ----- KẾT THÚC SỬA -----
 
 module.exports = router;
