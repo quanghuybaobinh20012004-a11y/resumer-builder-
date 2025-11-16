@@ -200,7 +200,7 @@ function LoginPage() {
           <p className="text-gray-400 text-sm mb-4">Or login with</p>
           <div className="flex gap-4 justify-center">
             <a 
-              href="http://localhost:5000/api/auth/google" 
+          href={`${import.meta.env.VITE_API_URL}/auth/google`}
               className="flex-1 py-2 bg-red-500 text-white rounded flex items-center justify-center gap-2 text-sm font-medium hover:bg-red-600 transition"
               title="Đăng nhập bằng Google"
             >
