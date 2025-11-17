@@ -1,8 +1,5 @@
-// Thay thế thư viện nodemailer bằng thư viện chính thức của SendGrid
 const sgMail = require('@sendgrid/mail');
 
-// 1. LẤY API KEY TỪ BIẾN MÔI TRƯỜNG MỚI (SENDGRID_API_KEY)
-// BIẾN MÔI TRƯỜNG NÀY PHẢI ĐƯỢC THÊM VÀO RENDER DASHBOARD
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 /**
@@ -12,24 +9,30 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
  * @param {string} htmlContent - Nội dung email (HTML)
  */
 const sendNotificationEmail = async (to, subject, htmlContent) => {
-    // Lưu ý: process.env.EMAIL_USER phải là email đã được xác minh trên SendGrid
+    const footerHtml = `
+        <div style="font-size: 10px; color: #999; margin-top: 20px; text-align: center; border-top: 1px solid #eee; padding-top: 10px;">
+            Được gửi bởi TopCV Builder | 84 DUONG SO 30 P6 QUAN GO VAP | HO CHI MINH, 71400 VNM
+            <br>
+            Nếu bạn nhận được email này do nhầm lẫn, vui lòng bỏ qua.
+        </div>
+    `;
+    
+    const fullHtmlContent = htmlContent + footerHtml;
+
     const msg = {
         from: `"TopCV Builder - Thông Báo Mới" <${process.env.EMAIL_USER}>`,
         to: to,
         subject: subject,
-        html: htmlContent,
+        html: fullHtmlContent, 
     };
 
     try {
-        // Thay thế transporter.sendMail bằng sgMail.send
         await sgMail.send(msg);
         console.log(`✅ Đã gửi email thông báo thành công tới: ${to} (qua SendGrid)`);
         return true;
     } catch (error) {
-        // In ra chi tiết lỗi từ SendGrid API
         console.error(`❌ Lỗi gửi email tới ${to} (qua SendGrid):`);
         
-        // Kiểm tra lỗi chi tiết từ Response của SendGrid (Nếu có)
         if (error.response) {
             console.error(error.response.body);
         } else {
