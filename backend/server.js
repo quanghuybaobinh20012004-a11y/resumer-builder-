@@ -16,17 +16,12 @@ const notificationRoutes = require('./routes/notification.routes');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ----- BẮT ĐẦU SỬA CORS -----
 
-// 1. XÓA BỎ HOÀN TOÀN ĐOẠN "FIX PRE-FLIGHT" CŨ CỦA BẠN.
-//    (Đoạn app.use((req, res, next) => {...}) GÂY XUNG ĐỘT)
-
-// 2. TẠO MỘT WHITELIST ĐẦY ĐỦ
 const whitelist = [
     'http://localhost:5173', // Cổng 5173
     'http://localhost:5174', // Cổng 5174 (lỗi mới nhất của bạn)
-    'https://resumebuilder11111.netlify.app', // Trang web chính (5 số 1)
-    /^https:\/\/([a-zA-Z0-9-]+\-\-)?resumebuilder11111\.netlify\.app$/ // Regex cho các bản preview của Netlify (RẤT QUAN TRỌNG)
+    'https://resumebuilder11111.netlify.app', 
+    /^https:\/\/([a-zA-Z0-9-]+\-\-)?resumebuilder11111\.netlify\.app$/ 
 ];
 
 const corsOptions = {
@@ -44,10 +39,8 @@ const corsOptions = {
     credentials: true
 };
 
-// 3. SỬ DỤNG DUY NHẤT 1 CẤU HÌNH CORS NÀY
 app.use(cors(corsOptions));
 
-// ----- KẾT THÚC SỬA CORS -----
 
 
 app.use(express.json({ limit: '10mb' }));

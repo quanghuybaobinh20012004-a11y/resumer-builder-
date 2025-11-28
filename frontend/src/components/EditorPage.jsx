@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useSearchParams } from 'react-router-dom'; 
+// FIX: Sửa lại đường dẫn import về thư mục cha
 import apiService from '../apiService';
+// FIX: Mở lại comment để sử dụng thư viện thật
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { v4 as uuidv4 } from 'uuid';
@@ -257,6 +259,11 @@ function EditorPage() {
         data.rightColumnOrder = data.rightColumnOrder || DEFAULT_RIGHT_COLUMN_ORDER;
         
         setCvData(data);
+
+        if (industry && (!data.personalInfo.summary || data.personalInfo.summary.trim() === '')) {
+            generateStarterContent(industry);
+        }
+
       } catch (error) { console.error("Lỗi tải CV", error); }
     };
     fetchCvData();

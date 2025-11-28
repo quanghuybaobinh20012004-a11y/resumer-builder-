@@ -1,4 +1,3 @@
-// File: config/passport.config.js
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/user.model'); // Import User model

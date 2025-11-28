@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import apiService from '../apiService'; 
 
 const GuideSection = ({ title, children, className = "" }) => (
   <div className={`bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-200 mb-8 ${className}`}>
@@ -10,13 +11,13 @@ const GuideSection = ({ title, children, className = "" }) => (
   </div>
 );
 
-
 function GuidePage() {
   const [industryInput, setIndustryInput] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Thêm trạng thái loading
   const navigate = useNavigate();
 
-  const handleStartAssist = () => {
+  const handleStartAssist = async () => { // Thêm async để gọi API
     const trimmedInput = industryInput.trim();
     if (trimmedInput.length < 3) {
       setError('Vui lòng nhập tên ngành nghề hoặc vị trí cụ thể (ít nhất 3 ký tự).');
@@ -26,9 +27,28 @@ function GuidePage() {
 
     const isAuthenticated = localStorage.getItem('token');
     
-   
-    
-    navigate(`/editor/new?industry=${encodeURIComponent(trimmedInput)}`);
+    if (isAuthenticated) {
+        // --- TRƯỜNG HỢP ĐÃ ĐĂNG NHẬP ---
+        setLoading(true);
+        try {
+            // 1. Tạo CV mới trong Database
+            const res = await apiService.post('/cvs', { 
+                cvName: `CV ${trimmedInput} (AI Gợi ý)` 
+            });
+            const newCvId = res.data.cv._id;
+            
+            // 2. Chuyển hướng đến trang Editor với ID thật
+            navigate(`/editor/${newCvId}?industry=${encodeURIComponent(trimmedInput)}`);
+        } catch (err) {
+            console.error(err);
+            setError("Lỗi khi tạo CV mới. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
+    } else {
+        // --- TRƯỜNG HỢP KHÁCH (GUEST) ---
+        navigate(`/editor/new?industry=${encodeURIComponent(trimmedInput)}`);
+    }
   };
 
   return (
@@ -56,13 +76,16 @@ function GuidePage() {
                     onChange={(e) => setIndustryInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleStartAssist()}
                     placeholder="VD: Data Analyst 2 năm kinh nghiệm"
+                    disabled={loading}
                     className={`flex-1 p-4 border rounded-xl shadow-inner outline-none transition-colors ${error ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300 focus:border-green-500'}`}
                 />
                 <button 
                     onClick={handleStartAssist}
-                    className="px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2"
+                    disabled={loading}
+                    className={`px-6 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition shadow-md flex items-center justify-center gap-2 ${loading ? 'opacity-70 cursor-wait' : ''}`}
                 >
-                    <i className="fas fa-magic"></i> Bắt đầu với AI
+                    {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className="fas fa-magic"></i>}
+                    {loading ? 'Đang tạo...' : 'Bắt đầu với AI'}
                 </button>
             </div>
             {error && <p className="mt-2 text-sm text-red-500 font-medium"><i className="fas fa-exclamation-triangle mr-1"></i> {error}</p>}
